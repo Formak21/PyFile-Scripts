@@ -19,7 +19,7 @@ THREAD_AMOUNT = 16
 
 class EncoderThread:
     def __init__(self):
-        # variable, that is needed to save the founded by thread files
+        # variable, that is needed to save founded by thread files
         # hash:[filepath1, filepath2, ...]
         self.thread_processed_files = dict()
 
