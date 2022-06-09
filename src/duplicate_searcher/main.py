@@ -9,7 +9,6 @@
 # * http://www.wtfpl.net/ for more details.
 
 # This script is searches file duplicates.
-from sys import exit
 from hashlib import sha256
 from os import listdir
 from os.path import isfile, isdir
@@ -21,7 +20,7 @@ def encoder(filepath) -> str:
         return sha256(f.read(-1)).hexdigest()
 
 
-# global variable, thath is needed to save the founded files
+# global variable, that is needed to save the founded files
 # hash:[filepath1, filepath2, ...]
 processed_files = dict()
 
@@ -65,4 +64,3 @@ except RecursionError:
 
 except FileNotFoundError:
     print('Path isn\'t correct.')
-    exit()
