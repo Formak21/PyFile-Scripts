@@ -12,9 +12,7 @@
 from hashlib import sha256
 from os import listdir
 from os.path import isfile, isdir
-
-# how many threads does have your processor
-THREAD_AMOUNT = 16
+import threading
 
 
 class EncoderThread:
@@ -47,8 +45,9 @@ class EncoderThread:
             self.thread_processed_files[t_hash_key].append(file)
 
 
-# there will be multithreading
-encoder_threads = [EncoderThread() for _ in range(THREAD_AMOUNT)]
+# Saving all threads to read results later
+encoders_list = []
+threads_list = []
 
 
 def duplicate_detector(path: str) -> None:
@@ -61,12 +60,18 @@ def duplicate_detector(path: str) -> None:
     for element in listdir(path):
         tmp_path = f"{path}/{element}"
         if isfile(tmp_path):
-            unprocessed_files.append(element)
+            # Create and start a thread for each file
+            encoders_list.append(EncoderThread())
+            threads_list.append(
+                threading.Thread(
+                    target=encoders_list[-1].executor,
+                    args=(path, [element]),
+                    daemon=True,
+                )
+            )
+            threads_list[-1].start()
         elif isdir(tmp_path):
             directories.append(element)
-
-    encoder_thread = encoder_threads[0]  # TODO: multithreading
-    encoder_thread.executor(path, unprocessed_files)
 
     for directory in directories:
         directory = f"{path}/{directory}"
@@ -77,18 +82,16 @@ def duplicate_detector(path: str) -> None:
 def get_processed_files() -> dict:
     processed_files = dict()
     processed_files_keys = set()
-
-    for encoder_thread in encoder_threads:
+    for encoder_thread in encoders_list:
         processed_files_keys = set.union(
             processed_files_keys,
             set(encoder_thread.thread_processed_files.keys()),
         )
 
     processed_files_keys = list(processed_files_keys)
-
     for t_hash_key in processed_files_keys:
         processed_files[t_hash_key] = []
-        for encoder_thread in encoder_threads:
+        for encoder_thread in encoders_list:
             processed_files[
                 t_hash_key
             ] += encoder_thread.thread_processed_files.get(t_hash_key, [])
@@ -98,10 +101,13 @@ def get_processed_files() -> dict:
 
 if __name__ == "__main__":
     root_path = input("Enter path to the root directory: ")
-
     try:
+        print("Starting threads...")
         duplicate_detector(root_path)
-
+        print("Done. Waiting for all threads to finish...")
+        for thread in threads_list:
+            thread.join()
+        print("Done. Counting duplicate files...")
         processed_files = get_processed_files()
         for hash_key in processed_files.keys():
             if len(processed_files[hash_key]) > 1:
