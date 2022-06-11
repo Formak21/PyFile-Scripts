@@ -12,9 +12,7 @@
 from hashlib import sha256
 from os import listdir
 from os.path import isfile, isdir
-
-# how many threads does have your processor
-THREAD_AMOUNT = 16
+import threading
 
 
 class EncoderThread:
@@ -24,77 +22,104 @@ class EncoderThread:
         self.thread_processed_files = dict()
 
     # encodes files with sha256 to check for uniqueness
-    def sha_encoder(self, filepath) -> str:
-        with open(file=filepath, mode='rb') as file:
-            return sha256(file.read(-1)).hexdigest()
+    def sha_encoder(self, filepath: str) -> str:
+        try:
+            encoder = sha256()
+            with open(file=filepath, mode="rb") as file:
+                chunk = 0
+                while chunk != b"":
+                    chunk = file.read(1024)
+                    encoder.update(chunk)
+            return encoder.hexdigest()
+        except Exception as e:
+            print("Unknown exception: ", e)
+            return "An error occured while trying to encode this file"
 
     # function that calculates and saves hash values for list of files
-    def executor(self, files_path, unprocessed_files):
+    def executor(self, files_path: str, unprocessed_files: list[str]) -> None:
         for file in unprocessed_files:
-            file = f'{files_path}/{file}'
+            file = f"{files_path}/{file}"
             t_hash_key = self.sha_encoder(file)
             if t_hash_key not in self.thread_processed_files.keys():
                 self.thread_processed_files[t_hash_key] = []
             self.thread_processed_files[t_hash_key].append(file)
 
 
-# there will be multithreading
-encoder_threads = [EncoderThread() for _ in range(THREAD_AMOUNT)]
+# Saving all threads to read results later
+encoders_list = []
+threads_list = []
 
 
-# recursive function that searches files and directories in given path
-def duplicate_detector(path):
+def duplicate_detector(path: str) -> None:
+    """
+    This function finds all duplicates in specified directory recursively.
+    """
     directories = list()
     unprocessed_files = list()
 
     for element in listdir(path):
-        tmp_path = f'{path}/{element}'
+        tmp_path = f"{path}/{element}"
         if isfile(tmp_path):
-            unprocessed_files.append(element)
+            # Create and start a thread for each file
+            encoders_list.append(EncoderThread())
+            threads_list.append(
+                threading.Thread(
+                    target=encoders_list[-1].executor,
+                    args=(path, [element]),
+                    daemon=True,
+                )
+            )
+            threads_list[-1].start()
         elif isdir(tmp_path):
             directories.append(element)
 
-    encoder_thread = encoder_threads[0]  # here will be multithreading
-    encoder_thread.executor(path, unprocessed_files)
-
     for directory in directories:
-        directory = f'{path}/{directory}'
+        directory = f"{path}/{directory}"
         duplicate_detector(directory)
 
 
-# function that needed for unification thread_processed_files dicts in one single
+# function to get dictionaries from all threads
 def get_processed_files() -> dict:
     processed_files = dict()
     processed_files_keys = set()
-
-    for encoder_thread in encoder_threads:
-        processed_files_keys = set.union(processed_files_keys, set(encoder_thread.thread_processed_files.keys()))
+    for encoder_thread in encoders_list:
+        processed_files_keys = set.union(
+            processed_files_keys,
+            set(encoder_thread.thread_processed_files.keys()),
+        )
 
     processed_files_keys = list(processed_files_keys)
-
     for t_hash_key in processed_files_keys:
         processed_files[t_hash_key] = []
-        for encoder_thread in encoder_threads:
-            processed_files[t_hash_key] += encoder_thread.thread_processed_files.get(t_hash_key, [])
+        for encoder_thread in encoders_list:
+            processed_files[
+                t_hash_key
+            ] += encoder_thread.thread_processed_files.get(t_hash_key, [])
 
     return processed_files
 
 
 if __name__ == "__main__":
-
-    start_path = input('Enter root path: ')
-
+    root_path = input("Enter path to the root directory: ")
     try:
-        duplicate_detector(start_path)
-
+        print("Starting threads...")
+        duplicate_detector(root_path)
+        print("Done. Waiting for all threads to finish...")
+        for thread in threads_list:
+            thread.join()
+        print("Done. Counting duplicate files...")
         processed_files = get_processed_files()
         for hash_key in processed_files.keys():
             if len(processed_files[hash_key]) > 1:
-                print('#' * 100, *processed_files[hash_key], f'\nFound {len(processed_files[hash_key])} duplicates',
-                      sep='\n')
-
+                print(
+                    "#" * 100,
+                    *processed_files[hash_key],
+                    f"\nFound {len(processed_files[hash_key])} duplicates",
+                    sep="\n",
+                )
     except RecursionError:
-        print('Script can\'t process file paths deeper than 999 directories.')
-
+        print("Script can't process directories with nesting levels > 999.")
     except FileNotFoundError:
-        print('Path isn\'t correct.')
+        print("Path isn't valid or the directory isn't readable.")
+    except Exception as e:
+        print(f"Unknown exception: {e}")
