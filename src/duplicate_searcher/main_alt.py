@@ -121,6 +121,8 @@ if __name__ == "__main__":
                 continue
 
             encoders_list.append(EncoderThread())
+            encoders_list[-1].executor(processed_files[file_size])
+        '''
             threads_list.append(
                 threading.Thread(
                     target=encoders_list[-1].executor,
@@ -129,9 +131,11 @@ if __name__ == "__main__":
                 )
             )
             threads_list[-1].start()
-
+        '''
+        '''
         for thread in threads_list:
             thread.join()
+        '''
 
         processed_files = get_processed_files()
 
@@ -141,8 +145,8 @@ if __name__ == "__main__":
                 processed_files.pop(file_hash)
                 continue
 
-            print_data('#' * 100 + '\n' + '\n'.join([file_object.file_path for file_object in processed_files[
-                file_hash]]) + f'\n\nFound {len(processed_files[file_hash])} duplicates')
+            print_data('#' * 100 + '\n' + '\n'.join(processed_files[file_hash])
+                       + f'\n\nFound {len(processed_files[file_hash])} duplicates')
 
     except Exception as e:
         print_log("Unknown exception: " + str(e))
