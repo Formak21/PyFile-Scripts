@@ -15,7 +15,6 @@ from os.path import isfile, isdir, getsize
 import threading
 
 # Parameters
-THREAD_AMOUNT = 16
 MEMORY_AMOUNT = 28 * 1024 * 1024 * 1024
 ROOT_PATH = 'C:/Users/Form49d/Desktop'
 EXPORT_FILENAME = 'Duplicates.txt'
@@ -131,8 +130,8 @@ if __name__ == "__main__":
                 )
             )
             threads_list[-1].start()
-        '''
-        '''
+
+
         for thread in threads_list:
             thread.join()
         '''
