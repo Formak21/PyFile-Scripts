@@ -130,6 +130,9 @@ if __name__ == "__main__":
             )
             threads_list[-1].start()
 
+        for thread in threads_list:
+            thread.join()
+
         processed_files = get_processed_files()
 
         for file_hash in list(processed_files.keys()):
