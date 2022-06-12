@@ -54,8 +54,7 @@ def duplicate_detector(path: str) -> None:
     """
     This function finds all duplicates in specified directory recursively.
     """
-    directories = list()
-    unprocessed_files = list()
+    directories = []
 
     for element in listdir(path):
         tmp_path = f"{path}/{element}"
@@ -79,8 +78,8 @@ def duplicate_detector(path: str) -> None:
 
 
 # function to get dictionaries from all threads
-def get_processed_files() -> dict:
-    processed_files = dict()
+def get_processed_files() -> dict[str, list[str]]:
+    processed_files = {}
     processed_files_keys = set()
     for encoder_thread in encoders_list:
         processed_files_keys = set.union(
