@@ -10,7 +10,7 @@ Everyone is allowed to open issues, suggest changes, or change code and add pull
 
 ## Contributors
 #### Developers:
-- Alexandr (@Formak21)
-- German Ivanov (@germanivanov0719)
+- [Alexandr](https://github.com/Formak21) (Original Creator)
+- [German Ivanov](https://github.com/germanivanov0719)
 
 
