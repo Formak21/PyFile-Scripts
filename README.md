@@ -1,11 +1,15 @@
 # PyFile-Scripts
-A simple set of Python scripts to work with a large number of files. dWTFPLv2 License.
+## About
+A useful set of tools to work with large number of files, written in Python. Provided under the terms of MIT License (see LICENSE).
 
-## Now we have:
-* Duplicate_Searcher* - Advanced multithread file duplates searcher. Documentation is available [here](docs/duplicate_searcher.md).
+## Tools available:
+- Duplicate_Searcher (testing) — Advanced multithread file duplates searcher. Documentation is available [here](docs/duplicate_searcher.md).
 
-\* - currently in development
 
-## YES YOU CAN CONTRIBUTE!!!
+## Contributors
+Everyone is allowed to open issues, suggest changes, or change code and add pull requests. Any kind of help will be highly appreciated. 
+#### Developers:
+- [Alexandr](https://github.com/Formak21) (Original Creator)
+- [German Ivanov](https://github.com/germanivanov0719)
 
 
