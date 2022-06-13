@@ -3,13 +3,12 @@
 
 
 # This script is searches file duplicates.
-from hashlib import sha256
+from hashlib import sha512
 from os import listdir
 from os.path import isfile, isdir
 import threading
 
-
-CHUNK_SIZE = 100 * 1024**2  # 100MiB
+CHUNK_SIZE = 100 * 1024 ** 2  # 100MiB
 
 
 class EncoderThread:
@@ -18,19 +17,19 @@ class EncoderThread:
         # hash:[filepath1, filepath2, ...]
         self.thread_processed_files = dict()
 
-    # encodes files with sha256 to check for uniqueness
-    def sha_encoder(self, filepath: str) -> str:
+    # encodes files with sha512 to check for uniqueness
+    def sha_encoder(self, file_path: str) -> str:
         try:
-            encoder = sha256()
-            with open(file=filepath, mode="rb") as file:
-                chunk = 0
+            encoder = sha512()
+            with open(file=file_path, mode="rb") as file:
+                chunk = file.read(CHUNK_SIZE)
                 while chunk != b"":
-                    chunk = file.read(CHUNK_SIZE)
                     encoder.update(chunk)
+                    chunk = file.read(CHUNK_SIZE)
             return encoder.hexdigest()
-        except Exception as e:
-            print("Unknown exception: ", e)
-            return "An error occured while trying to encode this file"
+        except Exception as ex:
+            print(f"Unknown exception: {ex}")
+            return "-1"
 
     # function that calculates and saves hash values for list of files
     def executor(self, files_path: str, unprocessed_files: list[str]) -> None:
