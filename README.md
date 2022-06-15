@@ -11,7 +11,7 @@ A useful set of tools to work with large number of files, written in Python. Pro
 
 ## Contributors
 
-Everyone is allowed to open issues, suggest changes, change code, and add pull requests. Any kind of help will be highly appreciated.
+Everyone is allowed to open issues, suggest changes, fork this project, modify code, and add pull requests. Any kind of help will be highly appreciated.
 
 #### Developers:
 
