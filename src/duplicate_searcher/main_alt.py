@@ -8,7 +8,7 @@ from os.path import isfile, isdir, getsize
 import threading
 
 # Parameters
-CHUNK_SIZE = 100 * 1024 ** 2  # 100MiB
+CHUNK_SIZE = 100 * 1024**2  # 100MiB
 ROOT_PATH = "C:/Users/Form49d/Desktop"
 EXPORT_FILENAME = "Duplicates.txt"
 LOG_FILENAME = "Errors.log"
