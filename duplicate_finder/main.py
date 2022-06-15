@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+This script finds duplicate files by comparing their hashes.
+For more info, see README.md.
 
-# This script is searches file duplicates.
-from hashlib import sha512
-from os import listdir
-from os.path import isfile, isdir
+License: MIT
+"""
+
+import os
+import sys
 import threading
+from hashlib import sha1
+from os import listdir
+from os.path import isdir, isfile
 
-CHUNK_SIZE = 100 * 1024 ** 2  # 100MiB
+HASH_FUNCTION = sha1  # function to use for hashing files
+RECURSION_LIMIT = 1000  # Max recursion level
+CHUNK_SIZE = 100 * 1024**2  # 100MiB
 
 
 class EncoderThread:
@@ -17,11 +26,12 @@ class EncoderThread:
         # hash:[filepath1, filepath2, ...]
         self.thread_processed_files = dict()
 
-    # encodes files with sha512 to check for uniqueness
-    def sha_encoder(self, file_path: str) -> str:
+    @staticmethod
+    def sha_encoder(filepath: str) -> str:
+        """Function to encode files with HASH_FUNCTION."""
         try:
-            encoder = sha512()
-            with open(file=file_path, mode="rb") as file:
+            encoder = HASH_FUNCTION()
+            with open(file=filepath, mode="rb") as file:
                 chunk = file.read(CHUNK_SIZE)
                 while chunk != b"":
                     encoder.update(chunk)
@@ -31,8 +41,8 @@ class EncoderThread:
             print(f"Unknown exception: {ex}")
             return "-1"
 
-    # function that calculates and saves hash values for list of files
     def executor(self, files_path: str, unprocessed_files: list[str]) -> None:
+        """Function to calculate hashes and save them in dictionary."""
         for file in unprocessed_files:
             file = f"{files_path}/{file}"
             t_hash_key = self.sha_encoder(file)
@@ -47,9 +57,7 @@ threads_list = []
 
 
 def duplicate_detector(path: str) -> None:
-    """
-    This function finds all duplicates in specified directory recursively.
-    """
+    """This function finds all duplicates in specified directory recursively."""
     directories = []
 
     for element in listdir(path):
@@ -73,8 +81,8 @@ def duplicate_detector(path: str) -> None:
         duplicate_detector(directory)
 
 
-# function to get dictionaries from all threads
 def get_processed_files() -> dict[str, list[str]]:
+    """Function to get dictionaries from all threads."""
     processed_files = {}
     processed_files_keys = set()
     for encoder_thread in encoders_list:
@@ -95,7 +103,16 @@ def get_processed_files() -> dict[str, list[str]]:
 
 
 if __name__ == "__main__":
-    root_path = input("Enter path to the root directory: ")
+    sys.setrecursionlimit(RECURSION_LIMIT)
+    if len(sys.argv) > 1:
+        root_path = sys.argv[1]
+    else:
+        root_path = input("Enter path to the root directory: ")
+
+    # Fix issue #4 (https://github.com/Formak21/PyFile-Scripts/issues/4)
+    if "~" in root_path:
+        root_path = os.path.expanduser(root_path)
+
     try:
         print("Starting threads...")
         duplicate_detector(root_path)
@@ -104,12 +121,12 @@ if __name__ == "__main__":
             thread.join()
         print("Done. Counting duplicate files...")
         processed_files = get_processed_files()
-        for hash_key in processed_files.keys():
-            if len(processed_files[hash_key]) > 1:
+        for hash_key, files in processed_files.items():
+            if len(files) > 1:
                 print(
                     "#" * 100,
-                    *processed_files[hash_key],
-                    f"Total: {len(processed_files[hash_key])} duplicates\n",
+                    *files,
+                    f"Total: {len(files)} duplicates\n",
                     sep="\n",
                 )
     except RecursionError:
