@@ -3,7 +3,7 @@
 A useful set of tools to work with large number of files, written in Python. Provided under the terms of MIT License (see LICENSE).
 
 ## Tools available:
-- Duplicate_Searcher (testing) — Advanced multithread file duplates searcher. Documentation is available [here](docs/duplicate_searcher.md).
+- Duplicate Searcher (β) — Advanced multithread file duplates searcher. [More…](src/duplicate_searcher/README.md)
 
 
 ## Contributors
