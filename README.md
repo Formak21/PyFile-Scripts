@@ -6,8 +6,8 @@ A useful set of tools to work with large number of files, written in Python. Pro
 
 ## Tools available:
 
-- Duplicate Finder (β) — Advanced multithread file duplates searcher. [More…](src/duplicate_finder/README.md)
-- Content Searcher (α) — Search for files using their content. [More…](src/content_searcher/README.md)
+- Duplicate Finder (β) — Advanced multithread file duplates searcher. [More…](duplicate_finder/README.md)
+- Content Searcher (α) — Search for files using their content. [More…](content_searcher/README.md)
 
 ## Contributors
 
