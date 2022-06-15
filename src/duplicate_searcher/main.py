@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+This script finds duplicate files by comparing their hashes.
+For more info, see README.md.
 
+License: MIT
+"""
 
-# This program is free software. It comes without any warranty, to
-# * the extent permitted by applicable law. You can redistribute it
-# * and/or modify it under the terms of the Do What The Fuck You Want
-# * To Public License, Version 2, as published by Sam Hocevar. See
-# * http://www.wtfpl.net/ for more details.
-
-# This script is searches file duplicates.
-from hashlib import sha256
-from os import listdir
-from os.path import isfile, isdir
+import sys
 import threading
+from hashlib import sha1
+from os import listdir
+from os.path import isdir, isfile
 
-
+HASH_FUNCTION = sha1
 CHUNK_SIZE = 100 * 1024**2  # 100MiB
 
 
@@ -24,22 +23,23 @@ class EncoderThread:
         # hash:[filepath1, filepath2, ...]
         self.thread_processed_files = dict()
 
-    # encodes files with sha256 to check for uniqueness
-    def sha_encoder(self, filepath: str) -> str:
+    @staticmethod
+    def sha_encoder(filepath: str) -> str:
+        """Function to encode files with HASH_FUNCTION."""
         try:
-            encoder = sha256()
+            encoder = HASH_FUNCTION()
             with open(file=filepath, mode="rb") as file:
                 chunk = 0
                 while chunk != b"":
                     chunk = file.read(CHUNK_SIZE)
                     encoder.update(chunk)
             return encoder.hexdigest()
-        except Exception as e:
-            print("Unknown exception: ", e)
+        except Exception as ex:
+            print("Unknown exception: ", ex)
             return "An error occured while trying to encode this file"
 
-    # function that calculates and saves hash values for list of files
     def executor(self, files_path: str, unprocessed_files: list[str]) -> None:
+        """Function to calculate hashes and save them in dictionary."""
         for file in unprocessed_files:
             file = f"{files_path}/{file}"
             t_hash_key = self.sha_encoder(file)
@@ -54,9 +54,7 @@ threads_list = []
 
 
 def duplicate_detector(path: str) -> None:
-    """
-    This function finds all duplicates in specified directory recursively.
-    """
+    """This function finds all duplicates in specified directory recursively."""
     directories = []
 
     for element in listdir(path):
@@ -80,8 +78,8 @@ def duplicate_detector(path: str) -> None:
         duplicate_detector(directory)
 
 
-# function to get dictionaries from all threads
 def get_processed_files() -> dict[str, list[str]]:
+    """Function to get dictionaries from all threads."""
     processed_files = {}
     processed_files_keys = set()
     for encoder_thread in encoders_list:
@@ -102,7 +100,10 @@ def get_processed_files() -> dict[str, list[str]]:
 
 
 if __name__ == "__main__":
-    root_path = input("Enter path to the root directory: ")
+    if len(sys.argv) > 1:
+        root_path = sys.argv[1]
+    else:
+        root_path = input("Enter path to the root directory: ")
     try:
         print("Starting threads...")
         duplicate_detector(root_path)
@@ -111,12 +112,12 @@ if __name__ == "__main__":
             thread.join()
         print("Done. Counting duplicate files...")
         processed_files = get_processed_files()
-        for hash_key in processed_files.keys():
-            if len(processed_files[hash_key]) > 1:
+        for hash_key, files in processed_files.items():
+            if len(files) > 1:
                 print(
                     "#" * 100,
-                    *processed_files[hash_key],
-                    f"Total: {len(processed_files[hash_key])} duplicates\n",
+                    *files,
+                    f"Total: {len(files)} duplicates\n",
                     sep="\n",
                 )
     except RecursionError:
