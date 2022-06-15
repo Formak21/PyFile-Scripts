@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This program is free software. It comes without any warranty, to
-# * the extent permitted by applicable law. You can redistribute it
-# * and/or modify it under the terms of the Do What The Fuck You Want
-# * To Public License, Version 2, as published by Sam Hocevar. See
-# * http://www.wtfpl.net/ for more details.
 from sys import exit
 from hashlib import sha512
 from os import listdir
@@ -13,7 +8,7 @@ from os.path import isfile, isdir, getsize
 import threading
 
 # Parameters
-MEMORY_AMOUNT = 28 * 1024 * 1024 * 1024
+CHUNK_SIZE = 100 * 1024 ** 2  # 100MiB
 ROOT_PATH = "C:/Users/Form49d/Desktop"
 EXPORT_FILENAME = "Duplicates.txt"
 LOG_FILENAME = "Errors.log"
@@ -21,6 +16,7 @@ SILENT_MODE = False
 # Global vars
 encoders_list = []
 threads_list = []
+
 
 # function that needed to print program log
 def print_log(data: str):
@@ -41,8 +37,13 @@ def print_data(data: str):
 # encodes files with sha512 to check for uniqueness
 def sha_encoder(file_path: str) -> str:
     try:
+        encoder = sha512()
         with open(file=file_path, mode="rb") as file:
-            return sha512(file.read(-1)).hexdigest()
+            chunk = file.read(CHUNK_SIZE)
+            while chunk != b"":
+                encoder.update(chunk)
+                chunk = file.read(CHUNK_SIZE)
+        return encoder.hexdigest()
     except Exception as ex:
         print_log(f"Unknown exception: {ex}")
         return "-1"

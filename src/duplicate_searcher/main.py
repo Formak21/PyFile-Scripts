@@ -16,8 +16,8 @@ from os import listdir
 from os.path import isdir, isfile
 
 HASH_FUNCTION = sha1  # function to use for hashing files
-CHUNK_SIZE = 100 * 1024**2  # 100MiB
 RECURSION_LIMIT = 1000  # Max recursion level
+CHUNK_SIZE = 100 * 1024**2  # 100MiB
 
 
 class EncoderThread:
@@ -32,14 +32,14 @@ class EncoderThread:
         try:
             encoder = HASH_FUNCTION()
             with open(file=filepath, mode="rb") as file:
-                chunk = 0
+                chunk = file.read(CHUNK_SIZE)
                 while chunk != b"":
-                    chunk = file.read(CHUNK_SIZE)
                     encoder.update(chunk)
+                    chunk = file.read(CHUNK_SIZE)
             return encoder.hexdigest()
         except Exception as ex:
-            print("Unknown exception: ", ex)
-            return "An error occured while trying to encode this file"
+            print(f"Unknown exception: {ex}")
+            return "-1"
 
     def executor(self, files_path: str, unprocessed_files: list[str]) -> None:
         """Function to calculate hashes and save them in dictionary."""
