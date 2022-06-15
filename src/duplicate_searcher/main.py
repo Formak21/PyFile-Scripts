@@ -8,14 +8,16 @@ For more info, see README.md.
 License: MIT
 """
 
+import os
 import sys
 import threading
 from hashlib import sha1
 from os import listdir
 from os.path import isdir, isfile
 
-HASH_FUNCTION = sha1
+HASH_FUNCTION = sha1  # function to use for hashing files
 CHUNK_SIZE = 100 * 1024**2  # 100MiB
+RECURSION_LIMIT = 1000  # Max recursion level
 
 
 class EncoderThread:
@@ -101,10 +103,16 @@ def get_processed_files() -> dict[str, list[str]]:
 
 
 if __name__ == "__main__":
+    sys.setrecursionlimit(RECURSION_LIMIT)
     if len(sys.argv) > 1:
         root_path = sys.argv[1]
     else:
         root_path = input("Enter path to the root directory: ")
+
+    # Fix issue #4 (https://github.com/Formak21/PyFile-Scripts/issues/4)
+    if "~" in root_path:
+        root_path = os.path.expanduser(root_path)
+
     try:
         print("Starting threads...")
         duplicate_detector(root_path)
