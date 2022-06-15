@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 This script finds duplicate files by comparing their hashes.
 For more info, see README.md.
