@@ -15,5 +15,5 @@ Everyone is allowed to open issues, suggest changes, change code, and add pull r
 
 #### Developers:
 
-- [Formak21](https://github.com/Formak21) (Original Creator)
-- [German Ivanov](https://github.com/germanivanov0719)
+- [Formak21](https://github.com/Formak21) (Original Author, Duplicate Searcher, Duplicate Searcher Alternative)
+- [German Ivanov](https://github.com/germanivanov0719) (Content Searcher, other contributions)
