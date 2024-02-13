@@ -11,5 +11,6 @@ Everyone is allowed to open issues, suggest changes, or change code and add pull
 #### Developers:
 - [Formak21](https://github.com/Formak21) (Original Creator)
 - [German Ivanov](https://github.com/germanivanov0719)
+- [Impervguin](https://github.com/Impervguin)
 
 
